@@ -2,17 +2,20 @@
 # -*- coding: utf-8 -*-
 
 
+import argparse
 import datetime
 import json
 import socket
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from os import system
+from pathlib import Path
 
 from event import Event
 from shared import Settings, colorize
 
-PORT = 7086
+LOG_ROOT = Path('~/Library/Logs/JacKit/').expanduser()
+SERVER_LOG_FILE = (LOG_ROOT / 'jacserver.log').open('w')
 
 
 def start():
@@ -62,7 +65,23 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     self.send_header('Content-Length', 0)
     self.end_headers()
 
-    system('clear')
+    # TODO: request body containing session info not used yet
+    size = int(self.headers['Content-Length'])
+    jsonDict = json.loads(self.rfile.read(size))
+
+    print('\n' * 8)
+    print(r'''[38;2;255;100;0m
+            _____                      __    __  __    __
+           |     \                    |  \  /  \|  \  |  \
+            \$$$$$  ______    _______ | $$ /  $$ \$$ _| $$_
+              | $$ |      \  /       \| $$/  $$ |  \|   $$ \
+         __   | $$  \$$$$$$\|  $$$$$$$| $$  $$  | $$ \$$$$$$
+        |  \  | $$ /      $$| $$      | $$$$$\  | $$  | $$ __
+        | $$__| $$|  $$$$$$$| $$_____ | $$ \$$\ | $$  | $$|  \
+         \$$    $$ \$$    $$ \$$     \| $$  \$$\| $$   \$$  $$
+          \$$$$$$   \$$$$$$$  \$$$$$$$ \$$   \$$ \$$    \$$$$
+
+        [0m''')
 
   def newEvent(self):
     self.send_response(200)
@@ -92,15 +111,27 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
     HTTPRequestHandler.last_timestamp = self.event.timestamp()
 
+  def log_message(self, format, *args):
+    if args[1] != '200':
+      SERVER_LOG_FILE.write(format % tuple(args) + '\n')
+      SERVER_LOG_FILE.flush()
 
-try:
-  system('stty -echo; clear; tput civis')
-  start()
-except KeyboardInterrupt:
-  exit(0)
-except Exception as e:
-  exit(1)
-else:
-  exit(0)
-finally:
-  system('tput cnorm; stty echo')
+
+def main():
+  try:
+    system('stty -echo; clear; tput civis')
+    start()
+  except KeyboardInterrupt:
+    exit(0)
+  except Exception as e:
+    exit(1)
+  except ConnectionResetError:
+    print('\n\nApp terminated, bye ....\n\n')
+  else:
+    exit(0)
+  finally:
+    system('tput cnorm; stty echo')
+
+
+if __name__ == "__main__":
+  main()
