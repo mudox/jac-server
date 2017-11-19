@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 
-import argparse
 import datetime
 import json
 import socket
@@ -69,19 +68,10 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     size = int(self.headers['Content-Length'])
     jsonDict = json.loads(self.rfile.read(size))
 
-    print('\n' * 8)
-    print(r'''[38;2;255;100;0m
-            _____                      __    __  __    __
-           |     \                    |  \  /  \|  \  |  \
-            \$$$$$  ______    _______ | $$ /  $$ \$$ _| $$_
-              | $$ |      \  /       \| $$/  $$ |  \|   $$ \
-         __   | $$  \$$$$$$\|  $$$$$$$| $$  $$  | $$ \$$$$$$
-        |  \  | $$ /      $$| $$      | $$$$$\  | $$  | $$ __
-        | $$__| $$|  $$$$$$$| $$_____ | $$ \$$\ | $$  | $$|  \
-         \$$    $$ \$$    $$ \$$     \| $$  \$$\| $$   \$$  $$
-          \$$$$$$   \$$$$$$$  \$$$$$$$ \$$   \$$ \$$    \$$$$
+    print('\n' * 20)
+    system('clear')
 
-        [0m''')
+    print(f'\n[38;2;255;100;0m{jsonDict["greeting"]}[0m\n\n')
 
   def newEvent(self):
     self.send_response(200)
