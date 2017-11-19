@@ -12,34 +12,34 @@ fi
 
 
 #
-# Editor
+# JacKit window
 #
 
-root="${HOME}/Develop/Python/jack-server/"
-window_name='Editor'
+root="${HOME}/Develop/Apple/Frameworks/JacKit/"
+window_name='JacKit'
 window="${session_name}:${window_name}"
-tmux new-session       \
-  -s "${session_name}" \
-  -n "${window_name}"  \
-  -x "$CLIENT_WIDTH"   \
-  -y "$CLIENT_HEIGHT"  \
-  -c "${root}"         \
+tmux new-session                         \
+  -s "${session_name}"                   \
+  -n "${window_name}"                    \
+  -x "$CLIENT_WIDTH" -y "$CLIENT_HEIGHT" \
+  -c "${root}"                           \
   -d
 
 #
-# Log
+# JacServer window
 #
 
-root="${HOME}/Git/vim-config"
-window_name='Log'
-window="${session_name}:${window_name}"
-tmux new-window -a -d        \
-  -t "${session_name}:{end}" \
-  -n "${window_name}"        \
-  -c "${root}"
+root="${HOME}/Develop/Python/jack-server/"
+window_name='JacServer'
+tmux new-window                 \
+  -n "${window_name}"           \
+  -a -t "${session_name}:{end}" \
+  -c "${root}"                  \
+  -d
 sleep 1
 tmux send-keys -t "${window}" "
-vv vimrc
+v python *.py
 "
+
 
 tmux select-window -t "${session_name}:Editor"
