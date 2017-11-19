@@ -68,11 +68,11 @@ class Test:
     self.postANewSession()
 
     while True:
-      baseInterval = 0.03
-      interval = random.randrange(20) * 0.04
-      sleep(baseInterval + random.randrange(15) * interval)
+      baseInterval = 0.02
+      interval = random.randrange(10) * 0.03
+      sleep(baseInterval + random.randrange(12) * interval)
 
-      dice = random.randrange(18)
+      dice = random.randrange(10)
       if dice == 0:
         self.postANewSession()
       else:
@@ -95,7 +95,7 @@ class Test:
 
   def postANewSession(self):
     session = {
-        'bundleID': f'io.github.mudox.JacServerFakeApp.{random.randrange(1, 7)}',
+        'bundleID': f'io.github.mudox.JacServerFakeApp',
         'timestamp': time.time(),
     }
     print("\n\n---- NEW SESSION ----\n\n")
