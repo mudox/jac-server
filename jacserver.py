@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import argparse
 import datetime
 import json
 import socket
@@ -17,15 +18,15 @@ LOG_ROOT = Path('~/Library/Logs/JacKit/').expanduser()
 SERVER_LOG_FILE = (LOG_ROOT / 'jacserver.log').open('w')
 
 
-def start():
+def start(port):
   """Start the server
   """
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   s.connect(("8.8.8.8", 80))
   ip = s.getsockname()[0]
 
-  httpd = HTTPServer((ip, 7086), HTTPRequestHandler)
-  print('Start server listening at {}:7086 ...\n\n'.format(ip))
+  httpd = HTTPServer((ip, port), HTTPRequestHandler)
+  print(f'Start server listening at {ip}:{port} ...\n\n')
   httpd.serve_forever()
 
 
@@ -108,9 +109,19 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 def main():
+  parser = argparse.ArgumentParser(
+      description='JacServer, server side of the iOS logging framework JacKit')
+  parser.add_argument(
+      '-p',
+      '--port',
+      help='Port number (default: 7080)',
+      default=7086,
+      type=int)
+  ns = parser.parse_args()
+
   try:
     system('stty -echo; clear; tput civis')
-    start()
+    start(ns.port)
   except KeyboardInterrupt:
     exit(0)
   except Exception as e:
