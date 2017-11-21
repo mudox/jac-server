@@ -67,16 +67,19 @@ class Test:
   def start(self):
     self.postANewSession()
 
-    while True:
-      baseInterval = 0.02
-      interval = random.randrange(10) * 0.03
-      sleep(baseInterval + random.randrange(12) * interval)
+    try:
+      while True:
+        baseInterval = 0.02
+        interval = random.randrange(10) * 0.03
+        sleep(baseInterval + random.randrange(12) * interval)
 
-      dice = random.randrange(10)
-      if dice == 0:
-        self.postANewSession()
-      else:
-        self.postAEvent()
+        dice = random.randrange(8)
+        if dice == 0:
+          self.postANewSession()
+        else:
+          self.postAEvent()
+    except KeyboardInterrupt:
+      return
 
   def postAEvent(self):
     e = Event(FakeEvent().jsonDict())

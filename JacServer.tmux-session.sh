@@ -12,7 +12,7 @@ fi
 
 
 #
-# JacKit window
+# JacKit
 #
 
 root="${HOME}/Develop/Apple/Frameworks/JacKit/"
@@ -24,22 +24,60 @@ tmux new-session                         \
   -x "$CLIENT_WIDTH" -y "$CLIENT_HEIGHT" \
   -c "${root}"                           \
   -d
+tmux send-keys -t "${window}.1" "
+vv -O ${window_name}.podspec Example/Podfile
+"
 
 #
-# JacServer window
+# JacServer
 #
 
-root="${HOME}/Develop/Python/jack-server/"
+root="${HOME}/Develop/Python/jacserver/"
 window_name='JacServer'
-tmux new-window                 \
-  -n "${window_name}"           \
-  -a -t "${session_name}:{end}" \
-  -c "${root}"                  \
+window="${session_name}:${window_name}"
+tmux new-window              \
+  -a                         \
+  -t "${session_name}:{end}" \
+  -n "${window_name}"        \
+  -c "${root}"               \
   -d
 sleep 1
 tmux send-keys -t "${window}" "
 v python *.py
 "
 
+#
+# Test
+#
 
-tmux select-window -t "${session_name}:Editor"
+root="${HOME}/Library/Logs/JacKit"
+window_name='Test'
+window="${session_name}:${window_name}"
+# .1 on the left side shows jacserver stdout
+tmux new-window              \
+  -a                         \
+  -t "${session_name}:{end}" \
+  -n "${window_name}"        \
+  -c "${root}"               \
+  -d                         \
+  pipenv shell
+# .2 at top right corner runs test.py
+root="${HOME}/Develop/Python/jacserver/"
+tmux split-window  \
+  -t "${window}.1" \
+  -h               \
+  -l 60            \
+  -c "${root}"     \
+  pipenv shell
+
+# .3 at botom right corner `tail -f` jacserver.py stderr
+root="${HOME}/Library/Logs/JacKit"
+tmux split-window  \
+  -t "${window}.2" \
+  -v               \
+  -c "${root}"     \
+  tail -f "${HOME}/Library/Logs/JacKit/jacserver.log"
+
+tmux select-window -t "${session_name}:1.1"
+echo "[${session_name}] started"
+tmux list-window -t "${session_name}" -F ' - #W'
