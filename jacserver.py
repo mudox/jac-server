@@ -18,19 +18,19 @@ LOG_ROOT = Path('~/Library/Logs/JacKit/').expanduser()
 SERVER_LOG_FILE = (LOG_ROOT / 'jacserver.log').open('w')
 
 
-def start(port):
 def log(text):
   print(text, file=SERVER_LOG_FILE, flush=True)
 
 
+def start():
   """Start the server
   """
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   s.connect(("8.8.8.8", 80))
   ip = s.getsockname()[0]
 
-  httpd = HTTPServer((ip, port), HTTPRequestHandler)
-  print(f'Start server listening at {ip}:{port} ...\n\n')
+  httpd = HTTPServer((ip, Settings.port), HTTPRequestHandler)
+  print(f'Start server listening at {ip}:{Settings.port} ...\n\n')
   httpd.serve_forever()
 
 
@@ -40,8 +40,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
   server_version = 'JackServer/0.1'
   protocol_version = 'HTTP/1.1'  # enable persistent connection
 
-  time_interval = 3
-  last_timestamp = time.time()
+  lastTimestamp = time.time()
 
   def do_POST(self):
     if self.path == '/session/':
@@ -91,9 +90,9 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     print(self.event.logLine())
 
   def printTimeSeparatorIfNeeded(self):
-    seconds = self.event.timestamp() - HTTPRequestHandler.last_timestamp
+    seconds = self.event.timestamp() - HTTPRequestHandler.lastTimestamp
 
-    if seconds > HTTPRequestHandler.time_interval:
+    if seconds > Settings.timeInterval:
       color1, color2 = Settings.colors['time_sep']
 
       delta = datetime.timedelta(seconds=seconds)
@@ -104,7 +103,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
       print(timeLine)
 
-    HTTPRequestHandler.last_timestamp = self.event.timestamp()
+    HTTPRequestHandler.lastTimestamp = self.event.timestamp()
 
   def log_message(self, format, *args):
     if args[1] != '200':
@@ -135,10 +134,15 @@ def cliParser():
   return parser
 
 
+def main():
+  options = cliParser().parse_args()
+  Settings.port = options.port
+  Settings.timeInterval = options.timeInterval
 
   try:
+    # disable terminal echo & hide cursor
     system('stty -echo; clear; tput civis')
-    start(ns.port)
+    start()
   except KeyboardInterrupt:
     exit(0)
   except ConnectionResetError:
@@ -146,11 +150,10 @@ def cliParser():
   except Exception as e:
     log(e)
     exit(1)
-  except ConnectionResetError:
-    print('\n\nApp terminated, bye ....\n\n')
   else:
     exit(0)
   finally:
+    # unhidden cursor & re-enalbe terminal eche
     system('tput cnorm; stty echo')
 
 
