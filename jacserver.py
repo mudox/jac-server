@@ -19,6 +19,10 @@ SERVER_LOG_FILE = (LOG_ROOT / 'jacserver.log').open('w')
 
 
 def start(port):
+def log(text):
+  print(text, file=SERVER_LOG_FILE, flush=True)
+
+
   """Start the server
   """
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -104,8 +108,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
   def log_message(self, format, *args):
     if args[1] != '200':
-      SERVER_LOG_FILE.write(format % tuple(args) + '\n')
-      SERVER_LOG_FILE.flush()
+      log(format % tuple(args) + '\n')
 
 
 def main():
@@ -124,7 +127,10 @@ def main():
     start(ns.port)
   except KeyboardInterrupt:
     exit(0)
+  except ConnectionResetError:
+    log('\n\nConnection is reset, bye ....\n\n')
   except Exception as e:
+    log(e)
     exit(1)
   except ConnectionResetError:
     print('\n\nApp terminated, bye ....\n\n')
