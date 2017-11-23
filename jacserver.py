@@ -111,16 +111,30 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
       log(format % tuple(args) + '\n')
 
 
-def main():
+def cliParser():
   parser = argparse.ArgumentParser(
-      description='JacServer, server side of the iOS logging framework JacKit')
+      description='JacServer, server side of the iOS logging framework JacKit'
+  )
+
   parser.add_argument(
       '-p',
       '--port',
       help='Port number (default: 7080)',
       default=7086,
-      type=int)
-  ns = parser.parse_args()
+      type=int
+  )
+  parser.add_argument(
+      '-t',
+      '--time-interval',
+      dest='timeInterval',
+      help='Interval (in seconds) for a time line (default: 3)',
+      default=3,
+      type=int
+  )
+
+  return parser
+
+
 
   try:
     system('stty -echo; clear; tput civis')
