@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# vim: fdm=marker
+set -euo pipefail
+
 
 CLIENT_WIDTH=213
 CLIENT_HEIGHT=57
