@@ -7,12 +7,9 @@ import socket
 import time
 from datetime import datetime
 from time import sleep
-
 import requests
 
 from event import Event
-
-SESSION_TIMESTAMP = datetime.now().isoformat(timespec='milliseconds')
 
 
 class FakeEvent:
@@ -35,7 +32,7 @@ class FakeEvent:
     self.sessionID = '{}.{}-{}'.format(
         FakeEvent.bundleIDPrefix,
         random.choice(FakeEvent.appNames),
-        SESSION_TIMESTAMP
+        datetime.now().isoformat(timespec='milliseconds')
     )
     self.timestamp = time.time()
     self.level = random.choice(FakeEvent.levels)
