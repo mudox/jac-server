@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# client size
+set +u
+if [[ -n "$TMUX" ]]; then
+  client_width="$(tmux list-clients -t '.' -F '#{client_width}')"
+  client_height="$(tmux list-clients -t '.' -F '#{client_height}')"
+else
+  client_width=$(tput lines)
+  client_height=$(tput cols)
+fi
+set -u
 
-CLIENT_WIDTH=213
-CLIENT_HEIGHT=57
 
 session_name='JacKit'
 if tmux has-session -t ${session_name} &>/dev/null; then
@@ -13,24 +21,25 @@ fi
 
 
 #
-# JacKit
+# window: JacKit
 #
 
 root="${HOME}/Develop/Apple/Frameworks/JacKit/"
 window_name='JacKit'
 window="${session_name}:${window_name}"
-tmux new-session                         \
-  -s "${session_name}"                   \
-  -n "${window_name}"                    \
-  -x "$CLIENT_WIDTH" -y "$CLIENT_HEIGHT" \
-  -c "${root}"                           \
+tmux new-session        \
+  -s "${session_name}"  \
+  -n "${window_name}"   \
+  -x "${client_width}"  \
+  -y "${client_height}" \
+  -c "${root}"          \
   -d
 tmux send-keys -t "${window}.1" "
 vv -O ${window_name}.podspec Example/Podfile
 "
 
 #
-# JacServer
+# window: JacServer
 #
 
 root="${HOME}/Develop/Python/jacserver/"
@@ -48,12 +57,13 @@ v python *.py
 "
 
 #
-# Test
+# window: Test
 #
 
 root="${HOME}/Library/Logs/JacKit"
 window_name='Test'
 window="${session_name}:${window_name}"
+
 # .1 on the left side shows jacserver stdout
 tmux new-window              \
   -a                         \
@@ -62,6 +72,7 @@ tmux new-window              \
   -c "${root}"               \
   -d                         \
   pipenv shell
+
 # .2 at top right corner runs test.py
 root="${HOME}/Develop/Python/jacserver/"
 tmux split-window  \
