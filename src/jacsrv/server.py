@@ -2,20 +2,27 @@
 # -*- coding: utf-8 -*-
 
 
-import argparse
 import datetime
 import json
+import logging
 import socket
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from os import system
 from pathlib import Path
 
-from event import Event
-from shared import Settings, colorize
+from . import settings
+from .event import Event
+
+logger = logging.getLogger(__name__)
 
 LOG_ROOT = Path('~/Library/Logs/JacKit/').expanduser()
 SERVER_LOG_FILE = (LOG_ROOT / 'jacserver.log').open('w')
+
+
+def sgrRGB(text, rgb):
+  r, g, b = rgb
+  return f'\033[38;2;{r};{g};{b}m{text}\033[0m'
 
 
 def log(text):
@@ -29,8 +36,8 @@ def start():
   s.connect(("8.8.8.8", 80))
   ip = s.getsockname()[0]
 
-  httpd = HTTPServer((ip, Settings.port), HTTPRequestHandler)
-  print(f'Start server listening at {ip}:{Settings.port} ...\n\n')
+  httpd = HTTPServer((ip, settings.port), HTTPRequestHandler)
+  print(f'Start server listening at {ip}:{settings.port} ...\n\n')
   httpd.serve_forever()
 
 
@@ -92,13 +99,13 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
   def printTimeSeparatorIfNeeded(self):
     seconds = self.event.timestamp() - HTTPRequestHandler.lastTimestamp
 
-    if seconds > Settings.timeInterval:
-      color1, color2 = Settings.colors['time_sep']
+    if seconds > settings.timeInterval:
+      color1, color2 = settings.colors['time_sep']
 
       delta = datetime.timedelta(seconds=seconds)
-      prefix = colorize('\n -- ', color2)
-      deltaColored = colorize(delta, color1)
-      suffix = colorize(' elapsed ---\n', color2)
+      prefix = sgrRGB('\n -- ', color2)
+      deltaColored = sgrRGB(delta, color1)
+      suffix = sgrRGB(' elapsed ---\n', color2)
       timeLine = f'{prefix}{deltaColored}{suffix}'
 
       print(timeLine)
@@ -108,54 +115,3 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
   def log_message(self, format, *args):
     if args[1] != '200':
       log(format % tuple(args) + '\n')
-
-
-def cliParser():
-  parser = argparse.ArgumentParser(
-      description='JacServer, server side of the iOS logging framework JacKit'
-  )
-
-  parser.add_argument(
-      '-p',
-      '--port',
-      help='Port number (default: 7080)',
-      default=7086,
-      type=int
-  )
-  parser.add_argument(
-      '-t',
-      '--time-interval',
-      dest='timeInterval',
-      help='Interval (in seconds) for a time line (default: 3)',
-      default=3,
-      type=int
-  )
-
-  return parser
-
-
-def main():
-  options = cliParser().parse_args()
-  Settings.port = options.port
-  Settings.timeInterval = options.timeInterval
-
-  try:
-    # disable terminal echo & hide cursor
-    system('stty -echo; clear; tput civis')
-    start()
-  except KeyboardInterrupt:
-    exit(0)
-  except ConnectionResetError:
-    log('\n\nConnection is reset, bye ....\n\n')
-  except Exception as e:
-    log(e)
-    exit(1)
-  else:
-    exit(0)
-  finally:
-    # unhidden cursor & re-enalbe terminal eche
-    system('tput cnorm; stty echo')
-
-
-if __name__ == "__main__":
-  main()

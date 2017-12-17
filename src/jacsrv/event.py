@@ -4,8 +4,7 @@
 from pathlib import Path
 from textwrap import indent
 
-from shared import Settings
-from shared import colorize
+from . import settings
 
 LOG_ROOT = Path('~/Library/Logs/JacKit/').expanduser()
 LOG_ROOT.mkdir(exist_ok=True)
@@ -40,8 +39,8 @@ class Event:
     return self.jsonDict['message']
 
   def logLine(self):
-    symbol = Settings.symbols[self.level()]
-    color1, color2 = Settings.colors[self.level()]
+    symbol = settings.symbols[self.level()]
+    color1, color2 = settings.colors[self.level()]
 
     headLine = colorize(f' {symbol}{self.subsystem()}', color1)
     messageLines = indent(self.message(), '\x20' * 3)
