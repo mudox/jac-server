@@ -75,7 +75,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     print('\n' * 20)
     system('clear')
 
-    print(f'\n[38;2;255;100;0m{jsonDict["greeting"]}[0m\n\n')
+    print(f'\n\x1b[38;2;255;100;0m{jsonDict["greeting"]}\x1b[0m\n\n')
 
   def newEvent(self):
     self.send_response(200)

@@ -43,7 +43,7 @@ class Event:
     symbol = Settings.symbols[self.level()]
     color1, color2 = Settings.colors[self.level()]
 
-    tagLine = colorize(f' {symbol}{self.subsystem()}', color1)
-    messageLines = indent(self.message(), '   ')
+    headLine = colorize(f' {symbol}{self.subsystem()}', color1)
+    messageLines = indent(self.message(), '\x20' * 3)
     messageLines = colorize(messageLines, color2)
-    return '\n'.join([tagLine, messageLines])
+    return '\n'.join([headLine, messageLines])
