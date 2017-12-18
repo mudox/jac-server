@@ -35,22 +35,22 @@ class Command():
     )
 
   def run(self):
-    args = self.parser.parse_args()
-    settings.port = args.port
-    settings.timeInterval = args.timeInterval
-
-    jacklog.configure(appName='jacsrv', fileName=f'port{settings.port}.log')
 
     try:
       # disable terminal echo & hide cursor
       system('stty -echo; clear; tput civis')
-      server.start()
+
+      args = self.parser.parse_args()
+      settings.port = args.port
+      settings.timeInterval = args.timeInterval
+
+      jacklog.configure(appName='jacsrv', fileName=f'port{settings.port}.log')
+
+      server.start(args.port)
     except KeyboardInterrupt:
       exit(0)
     except ConnectionResetError:
       server.log('\n\nConnection is reset, bye ....\n\n')
-    except Exception as e:
-      raise
     else:
       exit(0)
     finally:
@@ -58,5 +58,5 @@ class Command():
       system('tput cnorm; stty echo')
 
 
-def main():
+def run():
   Command().run()
