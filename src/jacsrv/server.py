@@ -7,6 +7,7 @@ import json
 import logging
 import socket
 import time
+from contextlib import closing
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from os import system
 from pathlib import Path
@@ -29,16 +30,35 @@ def log(text):
   print(text, file=SERVER_LOG_FILE, flush=True)
 
 
-def start():
-  """Start the server
-  """
-  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  s.connect(("8.8.8.8", 80))
-  ip = s.getsockname()[0]
+def getFreePort():
+  with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+    sock.bind(('', 0))
+    return sock.getsockname()[1]
 
-  httpd = HTTPServer((ip, settings.port), HTTPRequestHandler)
-  print(f'Start server listening at {ip}:{settings.port} ...\n\n')
-  httpd.serve_forever()
+
+def getIPAddress():
+  with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as sock:
+    sock.connect(('8.8.8.8', 80))
+    return sock.getsockname()[0]
+
+
+def start(port):
+  ip = getIPAddress()
+
+  try:
+    server = HTTPServer((ip, port), HTTPRequestHandler)
+    print(f'Start server listening at {ip}:{port} ...\n\n')
+
+  except OSError as e:
+    if e.errno == 48:
+      alternatePort = getFreePort()
+      print(f'Port {port} is occupied, try using port {alternatePort}')
+      server = HTTPServer((ip, alternatePort), HTTPRequestHandler)
+      print(f'Start server listening at {ip}:{alternatePort} ...\n\n')
+    else:
+      raise
+
+  server.serve_forever()
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):

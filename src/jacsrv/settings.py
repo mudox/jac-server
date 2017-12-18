@@ -18,8 +18,3 @@ colors = {
     'verbose': ((155, 155, 155), (130, 130, 130)),
     'time_sep': ((130, 130, 130), (70, 70, 70)),
 }
-
-
-def colorize(text, rgb):
-  r, g, b = rgb
-  return f'\033[38;2;{r};{g};{b}m{text}\033[0m'
