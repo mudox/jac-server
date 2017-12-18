@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from jacsrv.jacsrv import main
+from jacsrv.cmd import run
 
 if __name__ == '__main__':
-  main()
+  run()

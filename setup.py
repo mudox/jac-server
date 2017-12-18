@@ -10,7 +10,7 @@ from setuptools import find_packages, setup
 
 version = re.search(
     r"^__version__\s*=\s*'(.*)'",
-    open('src/jacsrv/main.py').read(),
+    open('src/jacsrv/cmd.py').read(),
     re.M
 ).group(1)
 
@@ -21,7 +21,7 @@ setup(
     package_dir={'': 'src'},
     include_package_data=True,
     entry_points={
-        "console_scripts": ['jacsrv = jacsrv.main:main']},
+        "console_scripts": ['jacsrv = jacsrv.cmd:run']},
     version=version,
     description='TBD',
     long_description='TBD',
