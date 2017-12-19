@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+source ~/Git/dot-files/bash/lib/jack
+
+tput civis
+trap 'tput cnorm' EXIT
+
 # client size
 set +u
 if [[ -n "$TMUX" ]]; then
@@ -15,17 +20,18 @@ set -u
 
 session_name='JacKit'
 if tmux has-session -t ${session_name} &>/dev/null; then
-  echo "session [${session_name}] already exisits, kill it!"
+  jackWarn "session [${session_name}] already exisits, kill it!"
   tmux kill-session -t "${session_name}"
 fi
 
 
 #
-# window: JacKit
+# window: Kit
 #
+jackProgress 'Creating window [Kit] ...'
 
 root="${HOME}/Develop/Apple/Frameworks/JacKit/"
-window_name='JacKit'
+window_name='Kit'
 window="${session_name}:${window_name}"
 tmux new-session        \
   -s "${session_name}"  \
@@ -35,15 +41,16 @@ tmux new-session        \
   -c "${root}"          \
   -d
 tmux send-keys -t "${window}.1" "
-vv -O ${window_name}.podspec Example/Podfile
+vv -O JacKit.podspec Example/Podfile
 "
 
 #
-# window: JacServer
+# window: Server
 #
+jackProgress 'Creating window [Server] ...'
 
-root="${HOME}/Develop/Python/jacserver/"
-window_name='JacServer'
+root="${HOME}/Develop/Python/jac-srv/"
+window_name='Server'
 window="${session_name}:${window_name}"
 tmux new-window              \
   -a                         \
@@ -59,8 +66,9 @@ v python *.py
 #
 # window: Test
 #
+jackProgress 'Creating window [Test] ...'
 
-root="${HOME}/Library/Logs/JacKit"
+root="${HOME}/.local/share/jacsrv/log"
 window_name='Test'
 window="${session_name}:${window_name}"
 
@@ -70,26 +78,33 @@ tmux new-window              \
   -t "${session_name}:{end}" \
   -n "${window_name}"        \
   -c "${root}"               \
-  -d                         \
-  pipenv shell
+  -d
+sleep 1
+tmux send-keys -t "${window}.1" '
+jacsrv
+'
 
-# .2 at top right corner runs test.py
-root="${HOME}/Develop/Python/jacserver/"
+# pane .2
+# at top right corner
+# runs `test.py`
+root="${HOME}/Develop/Python/jac-srv/"
 tmux split-window  \
   -t "${window}.1" \
   -h               \
   -l 60            \
-  -c "${root}"     \
-  pipenv shell
+  -c "${root}"
 
-# .3 at botom right corner `tail -f` jacserver.py stderr
-root="${HOME}/Library/Logs/JacKit"
+# pane: .3
+# at botom right corner
+# `tail -f` jacserver.py stderr
+root="${HOME}/.local/share/jacsrv/log"
 tmux split-window  \
   -t "${window}.2" \
   -v               \
-  -c "${root}"     \
-  tail -f "${HOME}/Library/Logs/JacKit/jacserver.log"
+  -c "${root}"
 
+
+jackEndProgress
 tmux select-window -t "${session_name}:1.1"
 echo "[${session_name}] started"
 tmux list-window -t "${session_name}" -F ' - #W'
