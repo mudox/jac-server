@@ -4,7 +4,7 @@
 import argparse
 from os import system
 
-from jacklog import jacklog
+from jaclog import jaclog
 
 from . import server, settings
 
@@ -44,7 +44,7 @@ class Command():
       settings.port = args.port
       settings.timeInterval = args.timeInterval
 
-      jacklog.configure(appName='jacsrv', fileName=f'port{settings.port}.log')
+      jaclog.configure(appName='jacsrv', fileName=f'port{settings.port}.log')
 
       server.start(args.port)
     except KeyboardInterrupt:
