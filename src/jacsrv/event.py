@@ -5,6 +5,7 @@ from pathlib import Path
 from textwrap import indent
 
 from . import settings
+from .screen import sgrRGB
 
 LOG_ROOT = Path('~/Library/Logs/JacKit/').expanduser()
 LOG_ROOT.mkdir(exist_ok=True)
@@ -42,7 +43,7 @@ class Event:
     symbol = settings.symbols[self.level()]
     color1, color2 = settings.colors[self.level()]
 
-    headLine = colorize(f' {symbol}{self.subsystem()}', color1)
+    headLine = sgrRGB(f' {symbol}{self.subsystem()}', color1)
     messageLines = indent(self.message(), '\x20' * 3)
-    messageLines = colorize(messageLines, color2)
+    messageLines = sgrRGB(messageLines, color2)
     return '\n'.join([headLine, messageLines])
