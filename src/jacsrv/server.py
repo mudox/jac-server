@@ -10,24 +10,12 @@ import time
 from contextlib import closing
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from os import system
-from pathlib import Path
 
 from . import settings
 from .event import Event
+from .screen import sgrRGB
 
 logger = logging.getLogger(__name__)
-
-LOG_ROOT = Path('~/Library/Logs/JacKit/').expanduser()
-SERVER_LOG_FILE = (LOG_ROOT / 'jacserver.log').open('w')
-
-
-def sgrRGB(text, rgb):
-  r, g, b = rgb
-  return f'\033[38;2;{r};{g};{b}m{text}\033[0m'
-
-
-def log(text):
-  print(text, file=SERVER_LOG_FILE, flush=True)
 
 
 def getFreePort():
@@ -134,4 +122,4 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
   def log_message(self, format, *args):
     if args[1] != '200':
-      log(format % tuple(args) + '\n')
+      logger.debug(format % tuple(args) + '\n')
